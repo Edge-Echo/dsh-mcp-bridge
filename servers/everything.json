@@ -1,0 +1,16 @@
+{
+  "id": "mcp-everything",
+  "serverName": "everything",
+  "title": "MCP official everything test server (demo)",
+  "description": "Zero-config demo server: echo, add, longRunningOperation, getTinyImage and more. Enabled by default.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-everything"],
+  "env": {},
+  "requiredEnv": [],
+  "verify": {
+    "status": "verified",
+    "date": "2026-08-15",
+    "note": "End-to-end verified on Windows: model called mcp__everything__echo and received 'Echo: hello'."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "mcp-remote",
+  "serverName": "remote",
+  "title": "Remote HTTP MCP server (streamable-http)",
+  "description": "Template for your own or a hosted MCP server over HTTP, with optional bearer auth. Ideal for sharing one tool service across DSH / Reasonix / CodeWhale.",
+  "transport": "streamable-http",
+  "url": "http://localhost:3000/mcp",
+  "headers": {
+    "Authorization": "Bearer ${MCP_TOKEN}"
+  },
+  "requiredEnv": ["MCP_TOKEN"],
+  "verify": {
+    "status": "needs-config",
+    "date": "",
+    "note": "Point url at your server; MCP_TOKEN only if auth is required."
+  }
+}

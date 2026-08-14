@@ -1,0 +1,18 @@
+{
+  "id": "mcp-github",
+  "serverName": "github",
+  "title": "GitHub",
+  "description": "GitHub repo/issue/PR operations. Requires GITHUB_TOKEN.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+  },
+  "requiredEnv": ["GITHUB_TOKEN"],
+  "verify": {
+    "status": "needs-config",
+    "date": "",
+    "note": "Requires GITHUB_TOKEN. Package name: GitHub's official server has moved to 'github-mcp-server' — confirm the current package before enabling."
+  }
+}

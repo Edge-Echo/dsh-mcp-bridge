@@ -1,0 +1,48 @@
+{
+  "name": "dsh-mcp-bridge",
+  "version": "0.1.0",
+  "description": "Curated, verified MCP server bundle for DeepSeek Harness (dsh): one install, battle-tested MCP servers — demo, memory, GitHub, Playwright, remote HTTP — plus a verify tool that checks every server's connectivity. 精选并验证过的 MCP 全家桶插件。",
+  "type": "module",
+  "license": "MIT",
+  "author": "dsh-mcp-bridge contributors",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "deepseek-harness",
+    "mcp",
+    "model-context-protocol",
+    "cordis",
+    "deepseek"
+  ],
+  "files": [
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "servers",
+    "scripts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Edge-Echo/dsh-mcp-bridge.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "verify": "node scripts/verify-servers.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6"
+  }
+}

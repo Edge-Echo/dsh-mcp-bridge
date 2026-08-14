@@ -1,0 +1,16 @@
+{
+  "id": "mcp-filesystem",
+  "serverName": "filesystem",
+  "title": "Filesystem access (scoped roots)",
+  "description": "Official MCP filesystem server: read/write/search under explicitly granted root directories only.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/path/to/allowed/root"],
+  "env": {},
+  "requiredEnv": [],
+  "verify": {
+    "status": "needs-config",
+    "date": "2026-08-15",
+    "note": "Last arg must be an existing root dir — edit it before enabling. Server itself verified working (13 tools) when given a real directory."
+  }
+}

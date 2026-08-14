@@ -1,0 +1,16 @@
+{
+  "id": "mcp-playwright",
+  "serverName": "playwright",
+  "title": "Browser automation (Playwright)",
+  "description": "Official Playwright MCP: navigate, click, fill, screenshot and more. First launch downloads browsers.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@playwright/mcp"],
+  "env": {},
+  "requiredEnv": [],
+  "verify": {
+    "status": "needs-config",
+    "date": "",
+    "note": "Heavy first-run (browser download); excluded from CI verify. Set PLAYWRIGHT_BROWSERS_PATH or accept the download on first use."
+  }
+}

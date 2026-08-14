@@ -1,0 +1,16 @@
+{
+  "id": "mcp-memory",
+  "serverName": "memory",
+  "title": "In-memory knowledge graph",
+  "description": "Zero-config persistent-in-session knowledge graph (entities / relations / observations). Useful for long conversations.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-memory"],
+  "env": {},
+  "requiredEnv": [],
+  "verify": {
+    "status": "verified",
+    "date": "2026-08-15",
+    "note": "Connectivity verified by scripts/verify-servers.mjs: 9 tools listed."
+  }
+}
