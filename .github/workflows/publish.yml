@@ -13,11 +13,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - name: Verify curated servers before publishing
         run: node scripts/verify-servers.mjs
