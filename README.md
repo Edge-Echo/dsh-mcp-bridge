@@ -1,5 +1,12 @@
 # dsh-mcp-bridge
 
+![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
+
+[![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Edge-Echo/dsh-mcp-bridge?color=22d3ee)](https://github.com/Edge-Echo/dsh-mcp-bridge)
+
 **Curated, verified MCP server bundle for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).**
 
 One install gives your dsh agent a set of battle-tested MCP servers — not a raw YAML you have to figure out. Every curated server has a machine-readable definition in `servers/`, and `scripts/verify-servers.mjs` checks each one's connectivity, so "verified" is a CI-guaranteed claim, not marketing.

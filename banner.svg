@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="dsh-mcp-bridge — curated, verified MCP server bundle for DeepSeek Harness">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="55%" stop-color="#111c33"/>
+      <stop offset="100%" stop-color="#0b1220"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4d6bfe"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="chip" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#16213a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="18%" r="65%">
+      <stop offset="0%" stop-color="#4d6bfe" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#4d6bfe" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="18%" cy="88%" r="55%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
+  <rect width="1280" height="640" fill="url(#glow2)"/>
+
+  <!-- 背景网格点 -->
+  <g fill="#ffffff" opacity="0.055">
+    <circle cx="60" cy="60" r="3"/><circle cx="180" cy="60" r="3"/><circle cx="300" cy="60" r="3"/>
+    <circle cx="420" cy="60" r="3"/><circle cx="540" cy="60" r="3"/><circle cx="660" cy="60" r="3"/>
+    <circle cx="780" cy="60" r="3"/><circle cx="900" cy="60" r="3"/><circle cx="1020" cy="60" r="3"/>
+    <circle cx="1140" cy="60" r="3"/><circle cx="1220" cy="60" r="3"/>
+    <circle cx="60" cy="180" r="3"/><circle cx="180" cy="180" r="3"/><circle cx="300" cy="180" r="3"/>
+    <circle cx="420" cy="180" r="3"/><circle cx="1020" cy="180" r="3"/><circle cx="1140" cy="180" r="3"/><circle cx="1220" cy="180" r="3"/>
+    <circle cx="60" cy="300" r="3"/><circle cx="180" cy="300" r="3"/><circle cx="300" cy="300" r="3"/>
+    <circle cx="1020" cy="300" r="3"/><circle cx="1140" cy="300" r="3"/><circle cx="1220" cy="300" r="3"/>
+    <circle cx="60" cy="420" r="3"/><circle cx="180" cy="420" r="3"/><circle cx="300" cy="420" r="3"/>
+    <circle cx="420" cy="420" r="3"/><circle cx="1020" cy="420" r="3"/><circle cx="1140" cy="420" r="3"/><circle cx="1220" cy="420" r="3"/>
+    <circle cx="60" cy="540" r="3"/><circle cx="180" cy="540" r="3"/><circle cx="300" cy="540" r="3"/>
+    <circle cx="420" cy="540" r="3"/><circle cx="1140" cy="540" r="3"/><circle cx="1220" cy="540" r="3"/>
+  </g>
+
+  <!-- 右上装饰环 -->
+  <circle cx="1120" cy="100" r="190" fill="none" stroke="#4d6bfe" stroke-opacity="0.22" stroke-width="2"/>
+  <circle cx="1120" cy="100" r="148" fill="none" stroke="#22d3ee" stroke-opacity="0.14" stroke-width="1.5"/>
+  <circle cx="1120" cy="100" r="104" fill="none" stroke="#4d6bfe" stroke-opacity="0.1" stroke-width="1"/>
+
+  <!-- 左下装饰环 -->
+  <circle cx="60" cy="590" r="120" fill="none" stroke="#22d3ee" stroke-opacity="0.1" stroke-width="1.5"/>
+
+  <!-- Logo：桥接图标 -->
+  <rect x="72" y="64" width="96" height="96" rx="24" fill="url(#brand)"/>
+  <circle cx="100" cy="112" r="15" fill="#ffffff" opacity="0.95"/>
+  <circle cx="140" cy="112" r="15" fill="#ffffff" opacity="0.95"/>
+  <rect x="116" y="104" width="10" height="16" rx="3" fill="#ffffff" opacity="0.95"/>
+
+  <!-- 主标题 -->
+  <text x="72" y="316" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="78" font-weight="800" fill="#f8fafc" letter-spacing="1">dsh-mcp-bridge</text>
+
+  <!-- 副标题 -->
+  <text x="72" y="374" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="30" font-weight="500" fill="#94a3b8">Curated, verified MCP server bundle for DeepSeek Harness</text>
+
+  <!-- 数据流示意（标题右侧） -->
+  <g stroke="#22d3ee" stroke-opacity="0.5" stroke-width="2">
+    <line x1="856" y1="300" x2="856" y2="238"/>
+    <line x1="856" y1="238" x2="920" y2="238"/>
+    <line x1="920" y1="238" x2="920" y2="300"/>
+    <line x1="856" y1="300" x2="920" y2="300"/>
+    <circle cx="856" cy="300" r="5" fill="#22d3ee" fill-opacity="0.6"/>
+    <circle cx="920" cy="238" r="5" fill="#22d3ee" fill-opacity="0.6"/>
+    <circle cx="920" cy="300" r="5" fill="#22d3ee" fill-opacity="0.6"/>
+  </g>
+  <g fill="#22d3ee" fill-opacity="0.5">
+    <rect x="904" y="228" width="32" height="20" rx="4" transform="rotate(45 920 238)"/>
+  </g>
+
+  <!-- Server chips -->
+  <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="600">
+    <g>
+      <rect x="72" y="508" width="176" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="160" y="541" text-anchor="middle" fill="#7dd3fc">everything</text>
+    </g>
+    <g>
+      <rect x="264" y="508" width="150" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="339" y="541" text-anchor="middle" fill="#7dd3fc">memory</text>
+    </g>
+    <g>
+      <rect x="430" y="508" width="178" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="519" y="541" text-anchor="middle" fill="#7dd3fc">filesystem</text>
+    </g>
+    <g>
+      <rect x="624" y="508" width="136" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="692" y="541" text-anchor="middle" fill="#7dd3fc">github</text>
+    </g>
+    <g>
+      <rect x="776" y="508" width="176" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="864" y="541" text-anchor="middle" fill="#7dd3fc">playwright</text>
+    </g>
+    <g>
+      <rect x="968" y="508" width="200" height="52" rx="26" fill="url(#chip)" stroke="#334155" stroke-width="1.5"/>
+      <text x="1068" y="541" text-anchor="middle" fill="#7dd3fc">remote-http</text>
+    </g>
+  </g>
+</svg>

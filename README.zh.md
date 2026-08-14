@@ -1,5 +1,12 @@
 # dsh-mcp-bridge
 
+![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
+
+[![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Edge-Echo/dsh-mcp-bridge?color=22d3ee)](https://github.com/Edge-Echo/dsh-mcp-bridge)
+
 **面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) 的精选、验证过的 MCP 全家桶插件。**
 
 一条命令装上经过实战检验的 MCP server 集合——而不是让你自己去琢磨一份 YAML。每个精选 server 在 `servers/` 里有机器可读定义，`scripts/verify-servers.mjs` 会逐个检查连通性，所以「已验证」是 CI 保证的事实，不是宣传话术。
