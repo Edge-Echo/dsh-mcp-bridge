@@ -1,6 +1,6 @@
 {
   "name": "dsh-mcp-bridge",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Curated, verified MCP server bundle for DeepSeek Harness (dsh): one install brings demo, memory, filesystem, GitHub, Playwright and remote HTTP MCP servers, with a connectivity verifier and CI checks.",
   "type": "module",
   "license": "MIT",
