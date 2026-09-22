@@ -2,6 +2,8 @@
 
 ![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
 
+> Part of the **dsh-toolkit family**: [dsh-mcp-bridge](https://github.com/Edge-Echo/dsh-mcp-bridge) · [dsh-win-toolkit](https://github.com/Edge-Echo/dsh-win-toolkit) · [dsh-netassist](https://github.com/Edge-Echo/dsh-netassist) · [dsh-driftwatch](https://github.com/Edge-Echo/dsh-driftwatch)
+
 [![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
 [![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
 [![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
@@ -14,6 +16,18 @@
 模型看到的工具名为 `mcp__<serverName>__<toolName>`（与 Claude Code / Codex 的服务器限定命名一致）。桥接层是 DSH 内置的 [`@deepseek-ai/dsh-mcp-client`](https://github.com/deepseek-ai/deepseek-harness)：支持 stdio / streamable-http、自动重连、HMR 热替换。
 
 > English docs: [README.md](README.md).
+
+## 交互式安装器
+
+```sh
+npx dsh-mcp-bridge init          # 交互式选择服务器
+npx dsh-mcp-bridge list          # 查看目录 + 验证状态
+npx dsh-mcp-bridge validate      # 列出 profile 里已配置的 MCP 条目
+```
+
+`init` 会把真正的 `insert:` 条目写进 profile 的**用户 patch 层**
+（`$DSH_HOME/profiles/<name>/cordis.patch.yml`）——所以你选的服务器能跨插件升级保留，
+并和你自己的 patch 共存。需要环境变量或占位路径的服务器会给出警告。
 
 ## 快速开始
 

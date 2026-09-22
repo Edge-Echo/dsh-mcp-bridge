@@ -2,6 +2,8 @@
 
 ![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
 
+> Part of the **dsh-toolkit family**: [dsh-mcp-bridge](https://github.com/Edge-Echo/dsh-mcp-bridge) · [dsh-win-toolkit](https://github.com/Edge-Echo/dsh-win-toolkit) · [dsh-netassist](https://github.com/Edge-Echo/dsh-netassist) · [dsh-driftwatch](https://github.com/Edge-Echo/dsh-driftwatch)
+
 [![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
 [![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
 [![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
@@ -14,6 +16,19 @@ One install gives your dsh agent a set of battle-tested MCP servers — not a ra
 Tools appear to the model as `mcp__<serverName>__<toolName>` (same server-qualified shape as Claude Code / Codex). The bridge itself is DSH's built-in [`@deepseek-ai/dsh-mcp-client`](https://github.com/deepseek-ai/deepseek-harness): stdio + streamable-http, auto-reconnect, HMR hot-swap.
 
 > 中文文档见 [README.zh.md](README.zh.md)。
+
+## Interactive installer
+
+```sh
+npx dsh-mcp-bridge init          # pick servers interactively
+npx dsh-mcp-bridge list          # catalog + verification status
+npx dsh-mcp-bridge validate      # list the MCP entries already in a profile
+```
+
+`init` writes real `insert:` entries into the profile's **user patch layer**
+(`$DSH_HOME/profiles/<name>/cordis.patch.yml`), so your selection survives plugin
+upgrades and coexists with your own patches. It warns about servers that need
+environment variables or a placeholder path to edit.
 
 ## Quick start
 
