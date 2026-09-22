@@ -29,6 +29,16 @@ npx dsh-mcp-bridge validate      # 列出 profile 里已配置的 MCP 条目
 （`$DSH_HOME/profiles/<name>/cordis.patch.yml`）——所以你选的服务器能跨插件升级保留，
 并和你自己的 patch 共存。需要环境变量或占位路径的服务器会给出警告。
 
+## 为什么不自己配？
+
+因为难的不是 YAML，而是它周围的一切。
+
+- 用户 patch 层是**覆盖**语义：在那里写一个新 id 会报 `patch: entry "x" not found`，新服务器必须用 `insert:`。
+- 配置少缩进一层会被解析成 `config: null`，服务器静默地永远不启动。
+- 连上了但没暴露工具的服务器，和正常工作的服务器长得一模一样，直到你问模型。
+
+这个包提供了可用的写法、会写对的安装器（`init`）、检查器（`list`、`validate`），以及一个真的会去连接的验证器。
+
 ## 快速开始
 
 前置条件：`dsh` 与 `pnpm` 在 PATH 上（`dsh plugin` 内部转发 pnpm；未装可 `npm i -g pnpm`）。

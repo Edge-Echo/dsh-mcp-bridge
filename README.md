@@ -30,6 +30,18 @@ npx dsh-mcp-bridge validate      # list the MCP entries already in a profile
 upgrades and coexists with your own patches. It warns about servers that need
 environment variables or a placeholder path to edit.
 
+## Why not just configure the MCP servers yourself?
+
+Because the fiddly parts are not the YAML — they are everything around it.
+
+- The user patch layer **overrides** existing entries; naming a new id there fails with
+  `patch: entry "x" not found`. New servers need `insert:`.
+- Config nested one level too shallow parses to `config: null`, and the server silently never starts.
+- A server that connects but exposes no tools looks exactly like a working one until you ask the model.
+
+This bundle ships working shapes, an installer that writes them correctly (`init`), inspectors
+(`list`, `validate`) and a verifier that actually connects.
+
 ## Quick start
 
 Prereqs: `dsh` and `pnpm` on PATH (`dsh plugin` forwards to pnpm; install with `npm i -g pnpm`).
