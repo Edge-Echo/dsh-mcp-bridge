@@ -58,6 +58,8 @@ The demo server (MCP official `everything`) is enabled by default — no API key
 
 ## Curated catalog
 
+![dsh-mcp-bridge list](assets/screenshot-catalog.png)
+
 | Server | What it gives you | Config needed | Verified |
 |---|---|---|---|
 | `everything` | Demo tools: echo, add, long-running ops, tiny image | none (default on) | ✅ 13 tools |
