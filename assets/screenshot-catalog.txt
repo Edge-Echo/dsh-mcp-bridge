@@ -1,0 +1,14 @@
+6 curated MCP server(s):
+
+  everything     ✅ verified
+      Zero-config demo server: echo, add, longRunningOperation, getTinyImage and more. Enabled by default.
+  filesystem     ⏸ needs config
+      Official MCP filesystem server: read/write/search under explicitly granted root directories only.
+  github         ⏸ needs config  (needs GITHUB_TOKEN)
+      GitHub repo/issue/PR operations. Requires GITHUB_TOKEN.
+  memory         ✅ verified
+      Zero-config persistent-in-session knowledge graph (entities / relations / observations). Useful for long conversations.
+  playwright     ⏸ needs config
+      Official Playwright MCP: navigate, click, fill, screenshot and more. First launch downloads browsers.
+  remote         ⏸ needs config  (needs MCP_TOKEN)
+      Template for your own or a hosted MCP server over HTTP, with optional bearer auth. Ideal for sharing one tool service across DSH / Reasonix / CodeWhale.
