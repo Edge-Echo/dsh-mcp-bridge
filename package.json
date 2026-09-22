@@ -13,7 +13,12 @@
     "mcp",
     "model-context-protocol",
     "cordis",
-    "deepseek"
+    "deepseek",
+    "mcp-server",
+    "mcp-bridge",
+    "ai-agent",
+    "tooling",
+    "integration"
   ],
   "files": [
     "cordis.patch.yml",
@@ -22,11 +27,15 @@
     "CHANGELOG.md",
     "LICENSE",
     "servers",
-    "scripts"
+    "scripts",
+    "lib"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Edge-Echo/dsh-mcp-bridge.git"
+  },
+  "bin": {
+    "dsh-mcp-bridge": "lib/cli.js"
   },
   "engines": {
     "node": ">=22"
@@ -36,6 +45,7 @@
     "access": "public"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "verify": "node scripts/verify-servers.mjs"
   },
   "dsh": {
@@ -45,5 +55,9 @@
   },
   "dependencies": {
     "@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0"
   }
 }

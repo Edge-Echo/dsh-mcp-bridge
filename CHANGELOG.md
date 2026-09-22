@@ -1,3 +1,14 @@
+## [0.2.0] - 2026-09-22
+
+### Added
+
+- **CLI installer** (`dsh-mcp-bridge` bin): `init` (interactive server picker that
+  writes real `insert:` entries into a profile's user patch layer), `list`
+  (catalog + verification status) and `validate` (inspect a profile's MCP entries).
+- Entry generation handles `insert:` semantics and config nesting correctly
+  (verified by parsing the generated patch with `dsh --dump-config`).
+- Family navigation line in both READMEs.
+- Expanded npm keywords.
 # Changelog
 
 All notable changes to this project are documented in this file.
