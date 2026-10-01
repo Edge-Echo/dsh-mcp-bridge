@@ -17,6 +17,25 @@ Tools appear to the model as `mcp__<serverName>__<toolName>` (same server-qualif
 
 > 中文文档见 [README.zh.md](README.zh.md)。
 
+
+## Requirements
+
+This package is a **configuration layer**, not a plugin of its own. Its `cordis.patch.yml`
+inserts entries that point at `@deepseek-ai/dsh-mcp-client`, which the host provides.
+
+- **`@deepseek-ai/dsh-mcp-client` must be installed in the profile you are adding this to**,
+  at the version matching your DSH line.
+- It is declared as a permissive optional peer (`>=0.1.0-rc.6`) rather than a dependency.
+  Pinning it previously forced an old copy into the tree whose own peers
+  (`dsh-tools@^0.0.1-rc.1`) conflict with current DSH releases, which made installation fail
+  on version resolution. Reported as issue #2.
+
+If installation fails, check that the client version in your profile matches your DSH version:
+
+```bash
+npm view @deepseek-ai/dsh-mcp-client versions --json | tail -20
+```
+
 ## Interactive installer
 
 ```sh

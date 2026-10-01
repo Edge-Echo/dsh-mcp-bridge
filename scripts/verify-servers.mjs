@@ -22,7 +22,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 /**
  * Resolve one SDK module (e.g. 'client/stdio.js').
  * Tries, in order:
- *  1. plain resolution from this package (npm/yarn layout, or hoisted SDK);
+ *  1. subpath resolution from this package (npm/yarn layout, or hoisted SDK);
  *  2. pnpm virtual store scan for @modelcontextprotocol+sdk@*;
  *  3. resolution anchored at @deepseek-ai/dsh-mcp-client's package dir.
  */
@@ -33,7 +33,11 @@ async function resolveSdkModule(rel) {
     return pathToFileURL(path.join(dir, 'dist', 'cjs', rel)).href
   }
   try {
-    return fromDir(path.dirname(require.resolve('@modelcontextprotocol/sdk')))
+    // Resolve the subpath, not the package root: the SDK's exports map has no "." entry,
+    // so root resolution throws ERR_PACKAGE_PATH_NOT_EXPORTED and this branch silently
+    // never matched. It worked only because the client package was a dependency and
+    // carried the SDK along.
+    return pathToFileURL(require.resolve(`@modelcontextprotocol/sdk/${rel}`)).href
   } catch {
     /* fall through */
   }

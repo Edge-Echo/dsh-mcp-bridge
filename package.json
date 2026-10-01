@@ -1,6 +1,6 @@
 {
   "name": "dsh-mcp-bridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Curated, verified MCP server bundle for DeepSeek Harness (dsh): one install brings demo, memory, filesystem, GitHub, Playwright and remote HTTP MCP servers, with a connectivity verifier and CI checks.",
   "type": "module",
   "license": "MIT",
@@ -53,11 +53,17 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "dependencies": {
-    "@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6"
-  },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "@types/node": "^24.0.0",
     "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-mcp-client": ">=0.1.0-rc.6"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-mcp-client": {
+      "optional": true
+    }
   }
 }
