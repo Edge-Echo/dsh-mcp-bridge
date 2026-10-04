@@ -1,13 +1,5 @@
 # dsh-mcp-bridge
 
-![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
-
-
-[![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
-[![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
-[![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Edge-Echo/dsh-mcp-bridge?color=22d3ee)](https://github.com/Edge-Echo/dsh-mcp-bridge)
-
 **Install six curated MCP servers into DSH in one command — and find out which of them actually work on your machine.**
 
 ### When you need this
@@ -18,12 +10,20 @@
 
 Every curated server is started, handshaken and its tool count checked in CI — `everything` answers with 13 tools, `memory` with 9, `filesystem` with 14.
 
-One install gives your dsh agent a set of battle-tested MCP servers — not a raw YAML you have to figure out. Every curated server has a machine-readable definition in `servers/`, and `scripts/verify-servers.mjs` checks each one's connectivity, so "verified" is a CI-guaranteed claim, not marketing.
+![dsh-mcp-bridge](https://raw.githubusercontent.com/Edge-Echo/dsh-mcp-bridge/main/banner.svg)
+
+
+[![npm version](https://img.shields.io/npm/v/dsh-mcp-bridge?color=4d6bfe&logo=npm)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-mcp-bridge?color=22d3ee)](https://www.npmjs.com/package/dsh-mcp-bridge)
+[![license](https://img.shields.io/npm/l/dsh-mcp-bridge?color=4d6bfe)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Edge-Echo/dsh-mcp-bridge?color=22d3ee)](https://github.com/Edge-Echo/dsh-mcp-bridge)
+
+
+One install gives your dsh agent a set of MCP servers that are started and queried on every push — not a raw YAML you have to figure out. Every curated server has a machine-readable definition in `servers/`, and `scripts/verify-servers.mjs` checks each one's connectivity, so "verified" is a CI-guaranteed claim, not marketing.
 
 Tools appear to the model as `mcp__<serverName>__<toolName>` (same server-qualified shape as Claude Code / Codex). The bridge itself is DSH's built-in [`@deepseek-ai/dsh-mcp-client`](https://github.com/deepseek-ai/deepseek-harness): stdio + streamable-http, auto-reconnect, HMR hot-swap.
 
 > 中文文档见 [README.zh.md](README.zh.md)。
-
 
 
 ## Feedback
@@ -38,7 +38,6 @@ the case that never gets reported:
 
 [Tell me in an issue](../../issues/new?template=usage.yml) — or if something is already broken,
 just open a normal bug report.
-
 
 ## Requirements
 
