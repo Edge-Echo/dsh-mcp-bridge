@@ -174,6 +174,36 @@ Give the repo the GitHub topic **`dsh-plugin`** so it shows up in the community 
 MIT — see [LICENSE](LICENSE).
 
 
+## A server that is not in the list
+
+The catalog is a starting point, not a ceiling. `add` installs any npm-published MCP server into a
+profile and then probes it, so the result is "it works" or "here is what broke":
+
+```bash
+npx dsh-mcp-bridge add @modelcontextprotocol/server-memory
+npx dsh-mcp-bridge add some-mcp-server --name some --env SOME_API_KEY
+```
+
+```
+Wrote memory (@modelcontextprotocol/server-memory) to ~/.dsh/profiles/web/cordis.patch.yml
+
+Checking that it actually starts...
+  OK — 9 tool(s) listed
+```
+
+If the probe fails, the entry stays written so you can fix it in place, and the message says where:
+
+```
+  FAILED at connect: MCP error -32000: Connection closed
+  the entry is still written so you can fix it in place:
+    ~/.dsh/profiles/web/cordis.patch.yml
+```
+
+Options: `--profile <name>` (defaults to the first profile), `--name <serverName>` (defaults to a
+name derived from the package), `--args a,b` (extra arguments), `--env KEY1,KEY2` (environment
+variables passed through from the environment), `--timeout <seconds>`.
+
+
 ## When a server does not start
 
 Installing is half the job. When a server never appears in your tool list, `doctor` starts each

@@ -9,6 +9,7 @@
 // ($DSH_HOME/profiles/<name>/cordis.patch.yml), so the choice survives
 // plugin upgrades instead of being lost with the bundle's own patch file.
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { spawn } from 'node:child_process'
 import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,15 +35,20 @@ interface ServerDef {
 
 interface Args {
   command: string
+  /** Non-flag arguments, e.g. the package name for `add`. */
+  positional: string[]
   profile?: string
   servers: string[]
+  name?: string
+  extraArgs: string[]
+  envNames: string[]
   yes: boolean
   json: boolean
   timeoutMs: number
 }
 
 function parseArgs(argv: string[]): Args {
-  const out: Args = { command: '', servers: [], yes: false, json: false, timeoutMs: 60_000 }
+  const out: Args = { command: '', positional: [], servers: [], extraArgs: [], envNames: [], yes: false, json: false, timeoutMs: 60_000 }
   const rest = [...argv]
   out.command = rest.shift() ?? ''
   while (rest.length) {
@@ -52,6 +58,9 @@ function parseArgs(argv: string[]): Args {
       case '--servers': case '-s': out.servers = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
       case '--yes': case '-y': out.yes = true; break
       case '--json': out.json = true; break
+      case '--name': out.name = rest.shift(); break
+      case '--args': out.extraArgs = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
+      case '--env': out.envNames = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
       case '--timeout': {
         const secs = Number(rest.shift() ?? '60')
         if (!Number.isFinite(secs) || secs <= 0) { console.error('--timeout expects a positive number of seconds'); process.exit(2) }
@@ -62,6 +71,7 @@ function parseArgs(argv: string[]): Args {
       case '--version': case '-v': out.command = '--version'; break
       default:
         if (t.startsWith('--')) { console.error(`Unknown option: ${t}`); process.exit(2) }
+        out.positional.push(t)
     }
   }
   return out
@@ -91,6 +101,11 @@ Examples:
   dsh-mcp-bridge init --profile web --servers everything,memory --yes
   dsh-mcp-bridge doctor
   dsh-mcp-bridge doctor --servers playwright --timeout 90
+  dsh-mcp-bridge add <npm-package> [--profile <name>] [--name <serverName>]
+      Install an MCP server that is not in the catalog, then probe it.
+
+  dsh-mcp-bridge add @modelcontextprotocol/server-memory
+  dsh-mcp-bridge add some-mcp-server --name some --env SOME_API_KEY
 `
 
 export function dshHome(): string {
@@ -351,6 +366,127 @@ function adviceFor(def: ServerDef, stage: string | undefined, error: string | un
  * way to tell whether the config is wrong, the package is gone, or the network is blocking it. The
  * stages are reported separately because the advice differs.
  */
+interface ProbeResult {
+  ok?: boolean
+  stage?: string
+  toolCount?: number
+  error?: string
+}
+
+/** Start one stdio server, complete the MCP handshake and list its tools. */
+function probeServer(def: ServerDef, command: string, timeoutMs: number): Promise<ProbeResult> {
+  const probe = join(HERE, '..', 'scripts', 'probe-server.mjs')
+  return new Promise((resolveProbe) => {
+    const child = spawn(process.execPath, [probe, command, ...(def.args ?? []), '--json'], {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      windowsHide: true,
+    })
+    let stdout = ''
+    let settled = false
+    const settle = (value: ProbeResult) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolveProbe(value)
+    }
+    const timer = setTimeout(() => {
+      child.kill()
+      settle({ ok: false, stage: 'connect', error: `no answer within ${Math.round(timeoutMs / 1000)}s` })
+    }, timeoutMs)
+    child.stdout.on('data', (d) => { stdout += String(d) })
+    child.on('error', (err) => settle({ ok: false, stage: 'spawn', error: (err as Error).message }))
+    child.on('close', () => {
+      const line = stdout.trim().split('\n').filter(Boolean).pop() ?? ''
+      try {
+        settle(JSON.parse(line) as ProbeResult)
+      } catch {
+        settle({ ok: false, stage: 'probe', error: 'the probe produced no result' })
+      }
+    })
+  })
+}
+
+/** Derive a server name from an npm package: @scope/server-memory -> memory. */
+function serverNameFromPackage(pkg: string): string {
+  const base = pkg.includes('/') ? pkg.slice(pkg.lastIndexOf('/') + 1) : pkg
+  return base
+    .replace(/^@/, '')
+    .replace(/^(server|mcp)[-_]?/, '')
+    .replace(/[-_]?mcp$/, '')
+    .replace(/[-_]?server$/, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '')
+    .toLowerCase() || 'custom'
+}
+
+/**
+ * Install an arbitrary npm-published MCP server into a profile and probe it.
+ *
+ * The curated catalog is the ceiling of init; this removes the ceiling without pretending the
+ * result is "verified" — the probe reports what actually happened on this machine.
+ */
+async function cmdAdd(args: Args): Promise<number> {
+  const pkg = args.positional[0]
+  if (!pkg) {
+    console.error('Usage: dsh-mcp-bridge add <npm-package> [--profile <name>] [--name <serverName>] [--args a,b] [--env KEY1,KEY2]')
+    return 2
+  }
+
+  const profiles = listProfiles()
+  const profile = args.profile ?? profiles[0]
+  if (!profile) {
+    console.error(`No profiles found under ${join(dshHome(), 'profiles')}. Create one first (e.g. \`dsh plugin --profile web add dsh-mcp-bridge\`).`)
+    return 1
+  }
+
+  const serverName = args.name ?? serverNameFromPackage(pkg)
+  const def: ServerDef = {
+    id: `custom-${serverName}`,
+    serverName,
+    title: pkg,
+    description: `Installed by dsh-mcp-bridge add: ${pkg}`,
+    transport: 'stdio',
+    command: 'npx',
+    args: ['-y', pkg, ...args.extraArgs],
+    env: Object.fromEntries(args.envNames.map((k) => [k, '${' + k + '}'])),
+    requiredEnv: args.envNames,
+  }
+
+  const patchFile = join(dshHome(), 'profiles', profile, 'cordis.patch.yml')
+  const result = writePatchFile(patchFile, [renderEntry(def)])
+
+  console.log(`Wrote ${def.serverName} (${pkg}) to ${patchFile}${result.created ? ' (created)' : ''}`)
+  if (args.envNames.length) {
+    console.log(`  env required: ${args.envNames.join(', ')} (read from the environment at profile start)`)
+  }
+
+  if (args.json) {
+    console.log(JSON.stringify({ profile, patchFile, serverName, package: pkg, probe: null }))
+    return 0
+  }
+
+  console.log(`\nChecking that it actually starts...`)
+  const missing = (def.requiredEnv ?? []).filter((k) => !process.env[k])
+  if (missing.length) {
+    console.log(`  skipped the probe: ${missing.join(', ')} not set in this shell`)
+    console.log('  the entry is written; restart the profile once those variables are available')
+    return 0
+  }
+
+  const probe = await probeServer(def, def.command ?? 'npx', args.timeoutMs)
+  if (probe.ok) {
+    console.log(`  OK — ${probe.toolCount ?? 0} tool(s) listed`)
+    console.log(`\nRestart the profile to pick it up, then: dsh-mcp-bridge validate --profile ${profile}`)
+    return 0
+  }
+
+  console.error(`  FAILED at ${probe.stage ?? 'unknown'}: ${probe.error ?? 'unknown error'}`)
+  console.error('  the entry is still written so you can fix it in place:')
+  console.error(`    ${patchFile}`)
+  console.error(`  to try the server by hand: npx -y ${pkg} ${args.extraArgs.join(' ')}`.trimEnd())
+  return 1
+}
+
+
 async function cmdDoctor(args: Args): Promise<number> {
   const { spawn } = await import('node:child_process')
   const probe = join(HERE, '..', 'scripts', 'probe-server.mjs')
@@ -481,6 +617,7 @@ async function main(): Promise<number> {
     case 'init': return await cmdInit(args)
     case 'validate': return await cmdValidate(args)
     case 'doctor': return await cmdDoctor(args)
+    case 'add': return await cmdAdd(args)
     default:
       console.error(`Unknown command: ${args.command}\n`)
       console.log(HELP)

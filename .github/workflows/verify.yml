@@ -16,6 +16,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: CLI tests (offline)
+        # Deterministic: add/probe is pointed at a bogus package with a short timeout, so this
+        # asserts entry-writing and exit codes rather than the network.
+        run: node scripts/test-cli.mjs
+
       - name: Verify curated MCP servers (zero-config ones)
         run: node scripts/verify-servers.mjs
         env:

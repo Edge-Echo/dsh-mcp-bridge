@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0
+
+**`add`: install any MCP server, not only the catalog.**
+
+```bash
+npx dsh-mcp-bridge add @modelcontextprotocol/server-memory
+```
+
+Writes a real entry into the profile's patch layer with the same renderer `init` uses, then starts
+the server, completes the MCP handshake and reports the tool count — so the result is "it works" or
+"it failed at <stage>: <reason>", not "a line was written". A failed probe keeps the entry so it can
+be fixed in place, and the message names the file.
+
+Options: `--profile`, `--name`, `--args`, `--env`, `--timeout`. Server names are derived from
+the package (`@modelcontextprotocol/server-memory` → `memory`) unless overridden.
+
+The CLI now has offline tests (12 assertions) covering entry writing, name derivation, `--env`
+rendering, exit codes and the failure message, wired into CI as a separate step.
+
 ## [0.2.0] - 2026-09-22
 
 ### Added
