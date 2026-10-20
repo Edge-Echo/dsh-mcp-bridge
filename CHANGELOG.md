@@ -1,3 +1,5 @@
+# Changelog
+
 ## [0.2.0] - 2026-09-22
 
 ### Added
@@ -9,7 +11,7 @@
   (verified by parsing the generated patch with `dsh --dump-config`).
 - Family navigation line in both READMEs.
 - Expanded npm keywords.
-# Changelog
+
 
 All notable changes to this project are documented in this file.
 
