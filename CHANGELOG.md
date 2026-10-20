@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0
+
+**`list --profile <name>` shows what that profile actually installs.**
+
+The catalog answers "what can I install"; the question people actually ask is "what is installed in
+this profile". Each catalog row is marked `[installed]`, entries added with `add` (which are not in
+the catalog at all) are listed separately, and a closing line says how many catalog servers are in
+use. Without `--profile` the output is unchanged.
+
 ## 0.5.0
 
 **`remove`: uninstall a server from a profile.**

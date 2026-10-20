@@ -682,14 +682,42 @@ async function cmdDoctor(args: Args): Promise<number> {
   return outcomes.some((o) => o.state === 'failed') ? 1 : 0
 }
 
+/** Which servers a profile's patch layer actually installs. */
+function installedInProfile(profile: string): { serverNames: Set<string>; ids: string[] } {
+  const patchFile = join(dshHome(), 'profiles', profile, 'cordis.patch.yml')
+  if (!existsSync(patchFile)) return { serverNames: new Set(), ids: [] }
+  const blocks = parsePatchBlocks(readFileSync(patchFile, 'utf8'))
+  return {
+    serverNames: new Set(blocks.map((b) => b.serverName).filter((n): n is string => Boolean(n))),
+    ids: blocks.map((b) => b.id ?? '').filter(Boolean),
+  }
+}
+
 function cmdList(args: Args): number {
   const catalog = loadCatalog()
-  if (args.json) { console.log(JSON.stringify(catalog, null, 2)); return 0 }
-  console.log(`${catalog.length} curated MCP server(s):\n`)
+  const installed = args.profile ? installedInProfile(args.profile) : null
+
+  if (args.json) {
+    console.log(JSON.stringify(installed ? { catalog, installed: [...installed.serverNames], ids: installed.ids } : catalog, null, 2))
+    return 0
+  }
+
+  console.log(`${catalog.length} curated MCP server(s)${installed ? ` — profile "${args.profile}"` : ''}:\n`)
   for (const d of catalog) {
     const env = d.requiredEnv?.length ? `  (needs ${d.requiredEnv.join(', ')})` : ''
-    console.log(`  ${d.serverName.padEnd(14)} ${statusIcon(d)}${env}`)
+    const mark = installed ? (installed.serverNames.has(d.serverName) ? '  [installed]' : '') : ''
+    console.log(`  ${d.serverName.padEnd(14)} ${statusIcon(d)}${env}${mark}`)
     console.log(`      ${d.description}`)
+  }
+
+  if (installed && args.profile) {
+    const custom = [...installed.serverNames].filter((n) => !catalog.some((d) => d.serverName === n))
+    if (custom.length) {
+      console.log(`\nAlso installed in "${args.profile}" (not in the catalog):`)
+      for (const name of custom) console.log(`  ${name}`)
+    }
+    const count = catalog.filter((d) => installed.serverNames.has(d.serverName)).length
+    console.log(`\n${count} of ${catalog.length} catalog server(s) installed in "${args.profile}".`)
   }
   return 0
 }
