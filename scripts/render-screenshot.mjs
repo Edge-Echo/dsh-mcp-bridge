@@ -65,7 +65,7 @@ for (const raw of lines) {
 closeBlocks()
 
 const page = `<!doctype html>
-<html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+<html translate="no"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
