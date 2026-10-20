@@ -5,12 +5,15 @@
   "description": "Zero-config demo server: echo, add, longRunningOperation, getTinyImage and more. Enabled by default.",
   "transport": "stdio",
   "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-everything"],
+  "args": [
+    "-y",
+    "@modelcontextprotocol/server-everything"
+  ],
   "env": {},
   "requiredEnv": [],
   "verify": {
     "status": "verified",
-    "date": "2026-08-15",
-    "note": "End-to-end verified on Windows: model called mcp__everything__echo and received 'Echo: hello'."
+    "date": "2026-10-20",
+    "note": "Connectivity verified by `dsh-mcp-bridge doctor`: 16 tools listed (was 13 in earlier runs)."
   }
 }

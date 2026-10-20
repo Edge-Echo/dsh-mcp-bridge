@@ -38,10 +38,11 @@ interface Args {
   servers: string[]
   yes: boolean
   json: boolean
+  timeoutMs: number
 }
 
 function parseArgs(argv: string[]): Args {
-  const out: Args = { command: '', servers: [], yes: false, json: false }
+  const out: Args = { command: '', servers: [], yes: false, json: false, timeoutMs: 60_000 }
   const rest = [...argv]
   out.command = rest.shift() ?? ''
   while (rest.length) {
@@ -51,6 +52,12 @@ function parseArgs(argv: string[]): Args {
       case '--servers': case '-s': out.servers = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
       case '--yes': case '-y': out.yes = true; break
       case '--json': out.json = true; break
+      case '--timeout': {
+        const secs = Number(rest.shift() ?? '60')
+        if (!Number.isFinite(secs) || secs <= 0) { console.error('--timeout expects a positive number of seconds'); process.exit(2) }
+        out.timeoutMs = secs * 1000
+        break
+      }
       case '--help': case '-h': out.command = '--help'; break
       case '--version': case '-v': out.command = '--version'; break
       default:
@@ -73,10 +80,17 @@ Usage:
   dsh-mcp-bridge validate [--profile <name>]
       Check the MCP entries already present in a profile (connection test).
 
+  dsh-mcp-bridge doctor [--servers a,b,c] [--timeout <seconds>] [--json]
+      Start each curated server, complete the MCP handshake, list its tools, and
+      report where it broke when it breaks. Skips servers whose required
+      environment variables are unset instead of calling that a failure.
+
 Examples:
   dsh-mcp-bridge list
   dsh-mcp-bridge init
   dsh-mcp-bridge init --profile web --servers everything,memory --yes
+  dsh-mcp-bridge doctor
+  dsh-mcp-bridge doctor --servers playwright --timeout 90
 `
 
 export function dshHome(): string {
@@ -297,6 +311,148 @@ async function cmdValidate(args: Args): Promise<number> {
   return 0
 }
 
+interface DoctorOutcome {
+  serverName: string
+  title: string
+  state: 'ok' | 'skipped' | 'failed'
+  detail: string
+  toolCount?: number
+  advice?: string
+}
+
+/** Name the probe stage in words a user can act on. */
+function describeProbeStage(stage?: string): string {
+  switch (stage) {
+    case 'resolve-sdk': return 'the probe could not load the MCP SDK'
+    case 'spawn': return 'the process could not be started'
+    case 'connect': return 'the server did not complete the MCP handshake'
+    case 'tools': return 'the handshake worked, but listing tools failed'
+    default: return 'the probe failed'
+  }
+}
+
+/** The concrete next step, which is the only reason to run a diagnostic at all. */
+function adviceFor(def: ServerDef, stage: string | undefined, error: string | undefined): string {
+  const manual = [def.command, ...(def.args ?? [])].filter(Boolean).join(' ')
+  if (error && /ENOENT|not recognized|not found/i.test(error)) {
+    return `the command is not on PATH — run it yourself to see why: ${manual}`
+  }
+  if (stage === 'connect') return `start it by hand and read its output: ${manual}`
+  if (stage === 'tools') {
+    return `the package may target a different MCP SDK version — try its newest release, then: ${manual}`
+  }
+  return `run it by hand to see the error: ${manual}`
+}
+
+/**
+ * Start each curated server, complete the handshake, list its tools, and report where it broke.
+ *
+ * This is the missing half of "install": when a server does not appear, the user currently has no
+ * way to tell whether the config is wrong, the package is gone, or the network is blocking it. The
+ * stages are reported separately because the advice differs.
+ */
+async function cmdDoctor(args: Args): Promise<number> {
+  const { spawn } = await import('node:child_process')
+  const probe = join(HERE, '..', 'scripts', 'probe-server.mjs')
+  if (!existsSync(probe)) {
+    console.error('probe-server.mjs is missing from this installation — reinstall the package.')
+    return 2
+  }
+
+  const catalog = loadCatalog()
+  const wanted = args.servers.length ? new Set(args.servers) : null
+  const targets = wanted ? catalog.filter((d) => wanted.has(d.serverName) || wanted.has(d.id)) : catalog
+  if (!targets.length) {
+    console.error(wanted ? `No catalog entry matches: ${[...wanted].join(', ')}` : 'The catalog is empty.')
+    return 2
+  }
+
+  const runProbe = (def: ServerDef, command: string): Promise<{ ok?: boolean; stage?: string; toolCount?: number; error?: string }> =>
+    new Promise((resolveProbe) => {
+      const child = spawn(process.execPath, [probe, command, ...(def.args ?? []), '--json'], {
+        stdio: ['ignore', 'pipe', 'ignore'],
+        windowsHide: true,
+      })
+      let stdout = ''
+      let settled = false
+      const settle = (value: { ok?: boolean; stage?: string; toolCount?: number; error?: string }) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        resolveProbe(value)
+      }
+      const timer = setTimeout(() => {
+        child.kill()
+        settle({ ok: false, stage: 'connect', error: `no answer within ${Math.round(args.timeoutMs / 1000)}s` })
+      }, args.timeoutMs)
+      child.stdout.on('data', (d) => { stdout += String(d) })
+      child.on('error', (err) => settle({ ok: false, stage: 'spawn', error: err.message }))
+      child.on('close', () => {
+        const line = stdout.trim().split('\n').filter(Boolean).pop() ?? ''
+        try {
+          settle(JSON.parse(line) as { ok?: boolean; stage?: string; toolCount?: number; error?: string })
+        } catch {
+          settle({ ok: false, stage: 'probe', error: 'the probe produced no result' })
+        }
+      })
+    })
+
+  const outcomes: DoctorOutcome[] = []
+  for (const def of targets) {
+    const base = { serverName: def.serverName, title: def.title }
+    const missing = (def.requiredEnv ?? []).filter((k) => !process.env[k])
+    if (missing.length) {
+      outcomes.push({ ...base, state: 'skipped', detail: `needs ${missing.join(', ')}` })
+      continue
+    }
+    if (def.transport === 'streamable-http') {
+      outcomes.push({ ...base, state: 'skipped', detail: 'remote endpoint — not probed here' })
+      continue
+    }
+    if (!def.command) {
+      outcomes.push({ ...base, state: 'skipped', detail: 'no command in the catalog entry' })
+      continue
+    }
+    const result = await runProbe(def, def.command)
+    if (result.ok) {
+      outcomes.push({ ...base, state: 'ok', detail: `${result.toolCount ?? 0} tools`, toolCount: result.toolCount })
+    } else if (def.verify?.status === 'needs-config') {
+      // The catalog already knows this one is not ready to run (placeholder path, missing account).
+      // Reporting it as a failure would send the user looking for a bug that is not there.
+      outcomes.push({
+        ...base,
+        state: 'skipped',
+        detail: `needs configuration first — ${result.error ?? 'did not start'}`,
+        advice: `fill in its settings before diagnosing: ${[def.command, ...(def.args ?? [])].filter(Boolean).join(' ')}`,
+      })
+    } else {
+      outcomes.push({
+        ...base,
+        state: 'failed',
+        detail: `${describeProbeStage(result.stage)}: ${result.error ?? 'unknown error'}`,
+        advice: adviceFor(def, result.stage, result.error),
+      })
+    }
+  }
+
+  if (args.json) {
+    console.log(JSON.stringify(outcomes, null, 2))
+  } else {
+    console.log(`Diagnosing ${targets.length} curated server(s), ${Math.round(args.timeoutMs / 1000)}s each…\n`)
+    for (const o of outcomes) {
+      const icon = o.state === 'ok' ? '✅' : o.state === 'skipped' ? '⏸ ' : '❌'
+      console.log(`  ${icon} ${o.serverName.padEnd(14)} ${o.detail}`)
+      if (o.advice) console.log(`       → ${o.advice}`)
+    }
+    const ok = outcomes.filter((o) => o.state === 'ok').length
+    const skipped = outcomes.filter((o) => o.state === 'skipped').length
+    const failed = outcomes.filter((o) => o.state === 'failed').length
+    console.log(`\n${ok} ok, ${skipped} skipped, ${failed} failed`)
+  }
+
+  return outcomes.some((o) => o.state === 'failed') ? 1 : 0
+}
+
 function cmdList(args: Args): number {
   const catalog = loadCatalog()
   if (args.json) { console.log(JSON.stringify(catalog, null, 2)); return 0 }
@@ -324,6 +480,7 @@ async function main(): Promise<number> {
     case 'list': return cmdList(args)
     case 'init': return await cmdInit(args)
     case 'validate': return await cmdValidate(args)
+    case 'doctor': return await cmdDoctor(args)
     default:
       console.error(`Unknown command: ${args.command}\n`)
       console.log(HELP)

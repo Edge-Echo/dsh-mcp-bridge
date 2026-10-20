@@ -1,0 +1,19 @@
+{
+  "id": "mcp-sequential-thinking",
+  "serverName": "sequential-thinking",
+  "title": "Structured reasoning",
+  "description": "Zero-config tool for breaking a hard problem into steps you can revise as you go. Useful when the model should plan before acting rather than improvise.",
+  "transport": "stdio",
+  "command": "npx",
+  "args": [
+    "-y",
+    "@modelcontextprotocol/server-sequential-thinking"
+  ],
+  "env": {},
+  "requiredEnv": [],
+  "verify": {
+    "status": "verified",
+    "date": "2026-10-20",
+    "note": "Verified by `dsh-mcp-bridge doctor`: 1 tool listed (sequentialthinking)."
+  }
+}

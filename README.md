@@ -173,6 +173,45 @@ Give the repo the GitHub topic **`dsh-plugin`** so it shows up in the community 
 
 MIT — see [LICENSE](LICENSE).
 
+
+## When a server does not start
+
+Installing is half the job. When a server never appears in your tool list, `doctor` starts each
+one, completes the MCP handshake and lists its tools, so you can see *where* it broke:
+
+```bash
+npx dsh-mcp-bridge doctor
+```
+
+```
+Diagnosing 7 curated server(s), 60s each…
+
+  ✅ everything     16 tools
+  ⏸  filesystem     needs configuration first — MCP error -32000: Connection closed
+       → fill in its settings before diagnosing: npx -y @modelcontextprotocol/server-filesystem C:/path/to/allowed/root
+  ⏸  github         needs GITHUB_TOKEN
+  ✅ memory         9 tools
+  ✅ playwright     25 tools
+  ⏸  remote         needs MCP_TOKEN
+  ✅ sequential-thinking 1 tools
+
+4 ok, 3 skipped, 0 failed
+```
+
+Failed stages are reported separately because the advice differs:
+
+| Stage | What it means | What to do |
+|---|---|---|
+| process could not be started | the command is not on PATH | check `npx` is installed |
+| server did not complete the handshake | it started and died | run the printed command yourself and read the output |
+| handshake worked, listing tools failed | protocol/version mismatch | try the newest release of that server |
+
+Servers that are simply not configured yet are reported as **skipped**, not failed — a placeholder
+path is not a bug.
+
+Other commands: `list` (catalog), `init` (install), `validate` (what is in a profile).
+
+
 ## Related
 
 Part of the **dsh-toolkit family** — small, independently useful pieces for
