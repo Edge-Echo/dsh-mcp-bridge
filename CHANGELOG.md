@@ -42,7 +42,8 @@ Options: `--profile`, `--name`, `--args`, `--env`, `--timeout`. Server names are
 the package (`@modelcontextprotocol/server-memory` → `memory`) unless overridden.
 
 The CLI now has offline tests (12 assertions) covering entry writing, name derivation, `--env`
-rendering, exit codes and the failure message, wired into CI as a separate step.
+rendering, exit codes and the failure message. The CI step is held until a token with the
+`workflow` scope is available (GitHub rejects pushes that touch workflow files without it).
 
 ## [0.2.0] - 2026-09-22
 
