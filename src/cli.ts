@@ -45,10 +45,11 @@ interface Args {
   yes: boolean
   json: boolean
   timeoutMs: number
+  dryRun: boolean
 }
 
 function parseArgs(argv: string[]): Args {
-  const out: Args = { command: '', positional: [], servers: [], extraArgs: [], envNames: [], yes: false, json: false, timeoutMs: 60_000 }
+  const out: Args = { command: '', positional: [], servers: [], extraArgs: [], envNames: [], yes: false, json: false, timeoutMs: 60_000, dryRun: false }
   const rest = [...argv]
   out.command = rest.shift() ?? ''
   while (rest.length) {
@@ -58,6 +59,7 @@ function parseArgs(argv: string[]): Args {
       case '--servers': case '-s': out.servers = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
       case '--yes': case '-y': out.yes = true; break
       case '--json': out.json = true; break
+      case '--dry-run': out.dryRun = true; break
       case '--name': out.name = rest.shift(); break
       case '--args': out.extraArgs = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
       case '--env': out.envNames = (rest.shift() ?? '').split(',').map((s) => s.trim()).filter(Boolean); break
@@ -106,6 +108,11 @@ Examples:
 
   dsh-mcp-bridge add @modelcontextprotocol/server-memory
   dsh-mcp-bridge add some-mcp-server --name some --env SOME_API_KEY
+
+  dsh-mcp-bridge remove <serverName> [--profile <name>] [--dry-run]
+      Remove a server entry from a profile patch layer.
+
+  dsh-mcp-bridge remove memory --profile web
 `
 
 export function dshHome(): string {
@@ -485,6 +492,92 @@ async function cmdAdd(args: Args): Promise<number> {
   console.error(`  to try the server by hand: npx -y ${pkg} ${args.extraArgs.join(' ')}`.trimEnd())
   return 1
 }
+interface PatchBlock {
+  start: number
+  end: number
+  id?: string
+  serverName?: string
+  text: string
+}
+
+/**
+ * Split a patch file into its `- insert:` entries.
+ *
+ * The renderer emits one entry per block with no blank lines inside, so detecting the top-level
+ * `- insert:` lines is enough. Anything before the first one (the header comment) is preserved.
+ */
+export function parsePatchBlocks(content: string): PatchBlock[] {
+  const lines = content.split(/\r?\n/)
+  const starts = lines.map((l, i) => (l.trim() === '- insert:' ? i : -1)).filter((i) => i >= 0)
+  return starts.map((start, k) => {
+    const end = k + 1 < starts.length ? starts[k + 1]! : lines.length
+    const text = lines.slice(start, end).join('\n')
+    return {
+      start,
+      end,
+      id: /^\s*-\s*id:\s*(\S+)/m.exec(text)?.[1],
+      serverName: /^\s*serverName:\s*(\S+)/m.exec(text)?.[1],
+      text,
+    }
+  })
+}
+
+/** Remove the entry matching a server name or id, leaving every other entry intact. */
+function cmdRemove(args: Args): number {
+  const name = args.positional[0]
+  if (!name) {
+    console.error('Usage: dsh-mcp-bridge remove <serverName> [--profile <name>] [--dry-run]')
+    return 2
+  }
+
+  const profiles = listProfiles()
+  const profile = args.profile ?? profiles[0]
+  if (!profile) {
+    console.error(`No profiles found under ${join(dshHome(), 'profiles')}.`)
+    return 1
+  }
+  const patchFile = join(dshHome(), 'profiles', profile, 'cordis.patch.yml')
+  if (!existsSync(patchFile)) {
+    console.error(`No patch file for profile ${profile}: ${patchFile}`)
+    return 2
+  }
+
+  const content = readFileSync(patchFile, 'utf8')
+  const blocks = parsePatchBlocks(content)
+  const matches = blocks.filter(
+    (b) => b.id === name || b.id === `custom-${name}` || b.serverName === name,
+  )
+  if (!matches.length) {
+    console.error(`No entry for "${name}" in ${patchFile}`)
+    const present = blocks.map((b) => b.serverName ?? b.id).filter(Boolean)
+    if (present.length) console.error(`Entries present: ${present.join(', ')}`)
+    return 2
+  }
+  if (matches.length > 1) {
+    console.error(`"${name}" matches ${matches.length} entries; be more specific:`)
+    for (const b of matches) console.error(`  id=${b.id ?? '?'} serverName=${b.serverName ?? '?'}`)
+    return 2
+  }
+  const target = matches[0]!
+  const label = target.serverName ?? target.id ?? name
+
+  if (args.dryRun) {
+    console.log(`Would remove ${label} (${target.id ?? '?'}) from ${patchFile}`)
+    console.log('--dry-run: nothing written')
+    return 0
+  }
+
+  const before = content.split(/\r?\n/).slice(0, blocks[0]!.start).join('\n').trimEnd()
+  const kept = blocks.filter((b) => b !== target).map((b) => b.text.trimEnd())
+  const next = [before, ...kept].filter(Boolean).join('\n\n') + '\n'
+  writeFileSync(patchFile, next, 'utf8')
+
+  console.log(`Removed ${label} (${target.id ?? '?'}) from ${patchFile}`)
+  console.log(`Restart the profile for it to take effect.`)
+  return 0
+}
+
+
 
 
 async function cmdDoctor(args: Args): Promise<number> {
@@ -618,6 +711,7 @@ async function main(): Promise<number> {
     case 'validate': return await cmdValidate(args)
     case 'doctor': return await cmdDoctor(args)
     case 'add': return await cmdAdd(args)
+    case 'remove': return cmdRemove(args)
     default:
       console.error(`Unknown command: ${args.command}\n`)
       console.log(HELP)

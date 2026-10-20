@@ -204,6 +204,17 @@ name derived from the package), `--args a,b` (extra arguments), `--env KEY1,KEY2
 variables passed through from the environment), `--timeout <seconds>`.
 
 
+## Removing a server
+
+```bash
+npx dsh-mcp-bridge remove memory --profile web
+```
+
+Removes one `- insert:` entry from the profile's patch layer, leaving every other entry and the
+header comment alone. `--dry-run` shows what would be removed without writing; an unknown name exits
+2 and lists the entries that are present. Restart the profile for it to take effect.
+
+
 ## When a server does not start
 
 Installing is half the job. When a server never appears in your tool list, `doctor` starts each

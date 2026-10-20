@@ -42,4 +42,18 @@ export declare function readProfileServers(profile: string): {
     serverName: string;
     transport: string;
 }[];
+interface PatchBlock {
+    start: number;
+    end: number;
+    id?: string;
+    serverName?: string;
+    text: string;
+}
+/**
+ * Split a patch file into its `- insert:` entries.
+ *
+ * The renderer emits one entry per block with no blank lines inside, so detecting the top-level
+ * `- insert:` lines is enough. Anything before the first one (the header comment) is preserved.
+ */
+export declare function parsePatchBlocks(content: string): PatchBlock[];
 export {};

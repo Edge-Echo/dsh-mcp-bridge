@@ -76,6 +76,29 @@ try {
     /SOME_KEY: !!js process\.env\.SOME_KEY/.test(afterEnv),
     (afterEnv.match(/SOME_KEY: .*/) ?? [''])[0].trim(),
   )
+  // ── remove ──────────────────────────────────────────────────────────────
+  const beforeRemove = readFileSync(patchFile, 'utf8')
+  const removal = run(['remove', 'withenv', '--profile', 'web'])
+  const afterRemove = readFileSync(patchFile, 'utf8')
+  check('remove exits zero', removal.code === 0, `exit ${removal.code}`)
+  check('remove drops the entry', !afterRemove.includes('custom-withenv'))
+  check(
+    'remove keeps every other entry',
+    afterRemove.includes('custom-memory') && afterRemove.includes('custom-mem2'),
+  )
+  check('remove preserves the header comment', afterRemove.includes('# dsh-mcp-bridge:'))
+  check('remove changed the file', beforeRemove !== afterRemove)
+
+  const dry = run(['remove', 'memory', '--profile', 'web', '--dry-run'])
+  const afterDry = readFileSync(patchFile, 'utf8')
+  check('--dry-run exits zero', dry.code === 0, `exit ${dry.code}`)
+  check('--dry-run does not write', afterDry === afterRemove && dry.out.includes('nothing written'))
+  check('--dry-run says what it would remove', /Would remove memory/.test(dry.out))
+
+  const missing = run(['remove', 'no-such-entry', '--profile', 'web'])
+  check('removing an unknown entry exits 2', missing.code === 2, `exit ${missing.code}`)
+  check('the unknown-entry error lists what is present', /Entries present:/.test(missing.out))
+
 } finally {
   rmSync(home, { recursive: true, force: true })
 }
